@@ -1,0 +1,645 @@
+/* 基础样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fb;
+    color: #2d3748;
+}
+
+/* 顶部标题栏 */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    height: 100%;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+/* 侧边栏系统 */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 60px;
+    bottom: 0;
+    width: 300px; /* 增加30px */
+    background: #ffffff;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 999;
+}
+
+.sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+/* 主内容区 */
+.main-content {
+    margin-top: 80px;
+    margin-left: 330px; /* 调整边距 */
+    padding: 30px;
+    transition: margin 0.3s;
+}
+
+.sidebar.collapsed + .main-content {
+    margin-left: 50px;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 85%;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+}
+
+/* 卡片式模块 */
+.section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.section h2 {
+    font-size: 1.25rem;
+    color: #2d3748;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+    cursor: pointer;
+    user-select: none;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+/* 表单元素 */
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+input:focus,
+textarea:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 8px 5px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#aiAnswerButton {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+}
+
+/* 问题列表项 */
+.question-item {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.question-item.collapsed .details {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.question-item .toggle-btn {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold; /* 加粗 */
+}
+
+.question-header .markdown-content {
+    display: inline;
+    font-weight: bold;
+}
+
+.question-header .markdown-content p {
+    display: inline;
+    margin: 0;
+}
+
+.question-header .markdown-content * {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.question-title code {
+    background-color: #f6f8fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-weight: normal;
+}
+
+#questionForm button {
+    width: 220px;
+    margin: 8px 5px;
+}
+
+/* 分页控件 */
+#pagination {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center; /* 新增：垂直居中 */
+    justify-content: center; /* 新增：水平居中 */
+    gap: 15px;
+    height: 50px; /* 新增：设置一个固定高度 */
+}
+
+#pagination button:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+}
+
+#pagination input {
+    padding: 5px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    text-align: center;
+}
+
+/* 悬浮导航按钮 */
+#navButtons {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#navButtons button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+}
+
+
+/* 新增搜索框样式 */
+#mainSearch {
+    max-width: 600px;
+    margin: 0 auto 30px;
+    text-align: center;
+}
+
+#mainSearch form {
+    display: flex;
+    gap: 10px;
+}
+
+#mainSearch input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+/* 模块折叠样式 */
+.section-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+    max-height: 1000px; /* 根据内容调整 */
+}
+
+.section-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 文件上传容器 */
+#fileUploadForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 文件输入框样式 */
+#questionsFile {
+    display: none; /* 隐藏默认的文件输入框 */
+}
+
+/* 自定义文件上传按钮 */
+.custom-file-upload {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.custom-file-upload:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* 文件上传容器 */
+#fileUploadForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 自定义文件上传按钮 */
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px;
+    height: 40px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    gap: 8px;
+}
+
+.custom-file-upload:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* 上传按钮样式 */
+/* 文件上传容器 */
+#fileUploadForm {
+    display: flex;
+    flex-direction: column; /* 垂直排列 */
+    align-items: center; /* 水平居中 */
+    gap: 10px; /* 按钮之间的间距 */
+    margin: 0 auto; /* 水平居中 */
+    max-width: 220px; /* 限制容器宽度 */
+}
+
+/* 自定义文件上传按钮 */
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px; /* 设置宽度 */
+    height: 40px; /* 设置高度 */
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    gap: 8px;
+}
+
+.custom-file-upload:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* 上传按钮样式 */
+#fileUploadForm button[type="submit"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px; /* 设置宽度 */
+    height: 40px; /* 设置高度 */
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    gap: 8px;
+}
+
+#fileUploadForm button[type="submit"]:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* 文件名显示样式 */
+#file-name {
+    display: block; /* 使文件名独占一行 */
+    text-align: center; /* 文字居中 */
+    margin-top: 10px; /* 与按钮的间距 */
+}
+
+/* 隐藏默认的文件输入框 */
+#questionsFile {
+    display: none;
+}
+
+/* Markdown content styles */
+.markdown-content {
+    line-height: 1.6;
+}
+
+.markdown-content code {
+    background-color: #f6f8fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.markdown-content pre {
+    background-color: #f6f8fa;
+    padding: 16px;
+    border-radius: 6px;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.markdown-content p {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.markdown-content blockquote {
+    padding: 0 1em;
+    color: #6a737d;
+    border-left: 0.25em solid #dfe2e5;
+    margin: 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    padding-left: 2em;
+    margin-bottom: 16px;
+}
+
+/* Enhanced Modal Styles (for both Edit and Add Question) */
+/* Enhanced Modal Styles (for both Edit and Add Question) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: modalFadeIn 0.3s ease;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px); /* 仅垂直方向动画 */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: none;
+    background: none;
+    padding: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: none;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    padding: 15px 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.modal-footer button {
+    margin: 0;
+}
+
+.btn-cancel {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-cancel:hover {
+    background: #cbd5e0;
+}
+
+/* Add Question Button (in the sidebar) */
+.add-question-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    gap: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+}
+
+.add-question-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.add-question-btn i {
+    font-size: 20px;
+}
+
+/* Form styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+
+
+@keyframes backdropFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
