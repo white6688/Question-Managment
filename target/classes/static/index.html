@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+    <script src="marked.min.js"></script>
+</head>
+<body>
+<!-- 顶部标题栏 -->
+<header class="header">
+    <div class="header-content">
+        <button class="sidebar-toggle" onclick="toggleSidebar()" style="position: absolute; left: 20px;">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 style="margin-left: 60px;">Question Management</h1>
+    </div>
+</header>
+
+<!-- 侧边栏 -->
+<nav class="sidebar" id="sidebar">
+    <!-- 添加问题按钮 -->
+    <button class="add-question-btn" onclick="openAddModal()">
+        <i class="fas fa-plus-circle"></i>
+        Add New Question
+    </button>
+
+    <!-- 文件上传模块 -->
+    <div class="section">
+        <h2 onclick="toggleSection(this)">Upload Questions ▼</h2>
+        <form id="fileUploadForm" class="section-content" enctype="multipart/form-data">
+            <!-- 自定义文件上传按钮 -->
+            <label for="questionsFile" class="custom-file-upload">
+                <i class="fas fa-upload"></i> Choose File
+            </label>
+            <span id="file-name" style="margin-left: 10px; font-size: 14px; color: #666;">No file chosen</span>
+            <input type="file" id="questionsFile" name="file" accept=".csv" required>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+</nav>
+
+<!-- 主内容区 -->
+<main class="main-content" id="mainContent">
+    <!-- 搜索模块 -->
+    <div id="mainSearch">
+        <form id="searchForm">
+            <input type="text" id="searchKeyword" placeholder="Search questions...">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <!-- 问题列表 -->
+    <div id="questionList"></div>
+
+    <!-- 分页 -->
+    <div id="pagination" style="display: none;">
+        <button id="prevPage" onclick="changePage(-1)">Previous</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" onclick="changePage(1)">Next</button>
+        <input type="number" id="pageInput" min="1" style="width: 60px;">
+        <button onclick="jumpToPage()">Go</button>
+    </div>
+
+    <!-- 导航按钮 -->
+    <div id="navButtons">
+        <button onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
+        <button onclick="scrollToBottom()"><i class="fas fa-arrow-down"></i></button>
+    </div>
+</main>
+
+<!-- Add Question Modal -->
+<div id="addQuestionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Question</h2>
+            <button class="modal-close" onclick="closeAddModal()">&times;</button>
+        </div>
+        <form id="questionForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="addTitle">Title:</label>
+                    <textarea id="addTitle" name="title" class="form-control" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="addAnswer">Answer:</label>
+                    <textarea id="addAnswer" name="answer" class="form-control" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit">Add Question</button>
+                <button type="button" id="aiAnswerButton">Generate AI Answer</button>
+                <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 更新模态框 -->
+<div id="updateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Update Question</h2>
+            <button class="modal-close" onclick="closeUpdateModal()">&times;</button>
+        </div>
+        <form id="updateForm">
+            <div class="modal-body">
+                <input type="hidden" id="updateId">
+                <div class="form-group">
+                    <label for="updateTitle">Title:</label>
+                    <textarea id="updateTitle" name="title" class="form-control" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="updateAnswer">Answer:</label>
+                    <textarea id="updateAnswer" name="answer" class="form-control" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeUpdateModal()">Cancel</button>
+                <button type="submit">Update Question</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 新增功能：模块折叠
+    function toggleSection(header) {
+        const section = header.parentElement;
+        const content = section.querySelector('.section-content');
+        content.classList.toggle('collapsed');
+        header.innerHTML = header.innerHTML.includes('▼') ?
+            header.innerHTML.replace('▼', '▶') :
+            header.innerHTML.replace('▶', '▼');
+    }
+
+    // 页码跳转
+    function jumpToPage() {
+        const page = parseInt(document.getElementById('pageInput').value);
+        const keyword = document.getElementById('searchKeyword').value;
+        if (page >= 1 && page <= window.totalPages) {
+            window.currentPage = page;
+            fetchQuestions(keyword, page);
+        }
+    }
+
+    // 更新后的copyContent函数
+    function copyContent(btn) {
+        const item = btn.closest('.question-item');
+        const text = `ID: ${item.querySelector('.question-id').textContent}\n\r\n` +
+            `Title: ${item.querySelector('.question-title').textContent}\n\r\n\r\n` + // 增加空行
+            `Answer: ${item.querySelector('.question-answer').textContent}`;
+        navigator.clipboard.writeText(text)
+            .then(() => alert('Content copied to clipboard!'))
+            .catch(error => alert('Failed to copy content'));
+    }
+
+    // 问题项折叠功能
+    function toggleQuestion(header) {
+        const item = header.closest('.question-item');
+        const details = item.querySelector('.details');
+        const btn = item.querySelector('.toggle-btn');
+
+        item.classList.toggle('collapsed');
+        btn.textContent = item.classList.contains('collapsed') ? '▶' : '▼';
+    }
+</script>
+
+<!-- 问题项模板 -->
+<script id="questionTemplate" type="text/template">
+    <div class="question-item">
+        <div class="question-header" onclick="toggleQuestion(this)">
+            <div>ID: <span class="question-id">{{id}}</span> - <span class="markdown-content question-title">{{{markedTitle}}}</span></div>
+            <button class="toggle-btn">▼</button>
+        </div>
+        <div class="details">
+            <div class="markdown-content question-answer">{{{markedAnswer}}}</div>
+            <div class="button-group">
+                <button onclick="updateQuestion('{{id}}', '{{encodedTitle}}', '{{encodedAnswer}}')">Edit</button>
+                <button onclick="deleteQuestion('{{id}}')">Delete</button>
+                <button onclick="copyContent(this)">Copy</button>
+            </div>
+        </div>
+    </div>
+</script>
+</body>
+</html>
