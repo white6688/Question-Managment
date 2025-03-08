@@ -126,48 +126,6 @@
     </div>
 </div>
 
-<script>
-    // 新增功能：模块折叠
-    function toggleSection(header) {
-        const section = header.parentElement;
-        const content = section.querySelector('.section-content');
-        content.classList.toggle('collapsed');
-        header.innerHTML = header.innerHTML.includes('▼') ?
-            header.innerHTML.replace('▼', '▶') :
-            header.innerHTML.replace('▶', '▼');
-    }
-
-    // 页码跳转
-    function jumpToPage() {
-        const page = parseInt(document.getElementById('pageInput').value);
-        const keyword = document.getElementById('searchKeyword').value;
-        if (page >= 1 && page <= window.totalPages) {
-            window.currentPage = page;
-            fetchQuestions(keyword, page);
-        }
-    }
-
-    // 更新后的copyContent函数
-    function copyContent(btn) {
-        const item = btn.closest('.question-item');
-        const text = `ID: ${item.querySelector('.question-id').textContent}\n\r\n` +
-            `Title: ${item.querySelector('.question-title').textContent}\n\r\n\r\n` + // 增加空行
-            `Answer: ${item.querySelector('.question-answer').textContent}`;
-        navigator.clipboard.writeText(text)
-            .then(() => alert('Content copied to clipboard!'))
-            .catch(error => alert('Failed to copy content'));
-    }
-
-    // 问题项折叠功能
-    function toggleQuestion(header) {
-        const item = header.closest('.question-item');
-        const details = item.querySelector('.details');
-        const btn = item.querySelector('.toggle-btn');
-
-        item.classList.toggle('collapsed');
-        btn.textContent = item.classList.contains('collapsed') ? '▶' : '▼';
-    }
-</script>
 
 <!-- 问题项模板 -->
 <script id="questionTemplate" type="text/template">

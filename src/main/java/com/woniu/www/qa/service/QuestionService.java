@@ -90,24 +90,67 @@ public PageInfo<Question> getQuestionsByTitleKeyword(String keyword, int pageNum
 
 
     public void processQuestionsFile(MultipartFile file) throws Exception {
-        Path tempFile = Files.createTempFile("questions", ".csv");
-        Files.write(tempFile, file.getBytes());
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("文件为空");
+        }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(tempFile)))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 2) {
-                    String title = parts[0].trim();
-                    String answer = parts[1].trim();
-                    Question question = new Question();
-                    question.setTitle(title);
-                    question.setAnswer(answer);
-                    questionMapper.insert(question);
+        // 验证文件类型
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".csv")) {
+            throw new IllegalArgumentException("只支持CSV文件格式");
+        }
+
+        Path tempFile = Files.createTempFile("questions", ".csv");
+        try {
+            Files.write(tempFile, file.getBytes());
+            
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(Files.newInputStream(tempFile), "UTF-8"))) {
+                String line;
+                int lineNumber = 0;
+                while ((line = br.readLine()) != null) {
+                    lineNumber++;
+                    if (line.trim().isEmpty()) {
+                        continue; // 跳过空行
+                    }
+                    
+                    try {
+                        // 使用更复杂的CSV解析逻辑
+                        String[] parts = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+                        if (parts.length != 2) {
+                            throw new IllegalArgumentException(
+                                String.format("第%d行格式错误: 需要2列数据(标题,答案)", lineNumber));
+                        }
+
+                        String title = parts[0].trim();
+                        String answer = parts[1].trim();
+                        
+                        // 移除可能存在的引号
+                        title = title.replaceAll("^\"|\"$", "");
+                        answer = answer.replaceAll("^\"|\"$", "");
+                        
+                        if (title.isEmpty() || answer.isEmpty()) {
+                            throw new IllegalArgumentException(
+                                String.format("第%d行数据不完整: 标题和答案不能为空", lineNumber));
+                        }
+
+                        Question question = new Question();
+                        question.setTitle(title);
+                        question.setAnswer(answer);
+                        questionMapper.insert(question);
+                    } catch (Exception e) {
+                        throw new RuntimeException(
+                            String.format("处理第%d行时发生错误: %s", lineNumber, e.getMessage()), e);
+                    }
                 }
             }
         } finally {
-            Files.delete(tempFile); // Delete the temporary file
+            try {
+                Files.delete(tempFile); // 删除临时文件
+            } catch (Exception e) {
+                // 记录删除临时文件失败的错误，但不影响主流程
+                e.printStackTrace();
+            }
         }
     }
 

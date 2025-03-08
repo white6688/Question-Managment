@@ -114,7 +114,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.woniu.www.qa.QaApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

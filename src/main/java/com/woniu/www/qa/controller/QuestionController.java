@@ -66,13 +66,21 @@ public Map<String, Object> getQuestionsByTitleKeyword(
 }
 
     @PostMapping("/upload")
-    public String uploadQuestionsFile(@RequestParam("file") MultipartFile file) {
+    public Map<String, String> uploadQuestionsFile(@RequestParam("file") MultipartFile file) {
+        Map<String, String> response = new HashMap<>();
         try {
             questionService.processQuestionsFile(file);
-            return "File uploaded and processed successfully";
+            response.put("status", "success");
+            response.put("message", "文件上传并处理成功");
+        } catch (IllegalArgumentException e) {
+            response.put("status", "error");
+            response.put("message", "文件格式错误: " + e.getMessage());
         } catch (Exception e) {
-            return "Error processing file: " + e.getMessage();
+            response.put("status", "error");
+            response.put("message", "处理文件时发生错误: " + e.getMessage());
+            e.printStackTrace(); // 在生产环境中应该使用proper logging
         }
+        return response;
     }
 
     @PostMapping("/ai-answer")

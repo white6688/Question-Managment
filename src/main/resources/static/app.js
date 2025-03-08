@@ -71,12 +71,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
 
-            const result = await response.text();
-            alert(result);
-            fileInput.value = ''; // Clear the file input
-            searchForm.dispatchEvent(new Event('submit')); // Refresh the list
+            const result = await response.json();
+            alert(result.message);
+            
+            if (result.status === 'success') {
+                fileInput.value = ''; // 清空文件输入
+                document.getElementById('file-name').textContent = 'No file chosen';
+                searchForm.dispatchEvent(new Event('submit')); // 刷新列表
+            }
         } catch (error) {
-            alert('Error uploading file: ' + error.message);
+            alert('上传文件时发生错误: ' + error.message);
         }
     });
 
@@ -167,6 +171,29 @@ document.addEventListener('DOMContentLoaded', () => {
     window.fetchQuestions('', 1);
 });
 
+
+
+function escapeHtml(str) {
+    if (typeof str !== 'string') {
+        return '';
+    }
+
+    // 使用正则表达式一次性替换所有特殊字符
+    const replaceMap = [
+        [/&/g, '&amp;'],         // 转义 &
+        [/</g, '&lt;'],          // 转义 <
+        [/>/g, '&gt;'],          // 转义 >
+        [/"/g, '&quot;'],        // 转义双引号
+        [/'/g, '&#039;'],        // 转义单引号
+        [/`/g, '&#96;']          // 转义反引号
+    ];
+
+    return replaceMap.reduce((acc,  [regex, replacement]) => {
+        return acc.replace(regex,  replacement);
+    }, str);
+}
+
+
 // Attach fetchQuestions to window to make it globally accessible
 window.fetchQuestions = async function(keyword, page) {
     try {
@@ -178,13 +205,14 @@ window.fetchQuestions = async function(keyword, page) {
         const template = document.getElementById('questionTemplate').innerHTML;
 
         data.list.forEach(question => {
-            // Convert both title and answer to HTML using marked
-            const markedTitle = marked.parse(question.title);
-            const markedAnswer = marked.parse(question.answer);
-
-            // Encode title and answer for safe use in onclick attributes
+            const escapedTitle = escapeHtml(question.title);
+            const escapedAnswer = escapeHtml(question.answer);
+            const markedTitle = marked.parse(escapedTitle);
+            const markedAnswer = marked.parse(escapedAnswer);
             const encodedTitle = encodeURIComponent(question.title);
             const encodedAnswer = encodeURIComponent(question.answer);
+
+
 
             const html = template
                 .replace(/{{id}}/g, question.id)
@@ -374,13 +402,12 @@ function toggleSection(header) {
         header.innerHTML.replace('▶', '▼');
 }
 
-// 更新后的copyContent函数
+// 更新copyContent函数
 function copyContent(btn) {
     const item = btn.closest('.question-item');
-    const text = `ID: ${item.querySelector('.question-id').textContent}\n\r\n` +
-        `Title: ${item.querySelector('.question-title').textContent}\n\r\n\r\n` + // 增加空行
-        `Answer: ${item.querySelector('.question-answer').textContent}`;
-    navigator.clipboard.writeText(text)
-        .then(() => alert('Content copied to clipboard!'))
+    const answer = item.querySelector('.question-answer').textContent;
+    navigator.clipboard.writeText(answer)
+        .then(() => alert('Answer copied to clipboard!'))
         .catch(error => alert('Failed to copy content'));
 }
+
